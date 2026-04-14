@@ -41,3 +41,27 @@ test("QRL encoding - invalid length", () => {
     "Unrecognised address format"
   );
 });
+
+test("QRL encoding - invalid checksum with valid length", () => {
+  const invalidHex = `${payloadHex}ffffffff`;
+  expect(() => encodeQrlAddress(hexToBytes(invalidHex))).toThrow(
+    "Unrecognised address format"
+  );
+});
+
+test("QRL decoding - invalid hex character", () => {
+  const invalid = `${address.slice(0, -1)}g`;
+  expect(() => decodeQrlAddress(invalid)).toThrow("Unrecognised address format");
+});
+
+test("QRL decoding - uppercase hex is accepted", () => {
+  const upper = `Q${`${payloadHex}${checksumHex}`.toUpperCase()}`;
+  expect(bytesToHex(decodeQrlAddress(upper))).toEqual(`${payloadHex}${checksumHex}`);
+});
+
+test("QRL decoding - lowercase prefix is rejected", () => {
+  const lowerPrefix = `q${address.slice(1)}`;
+  expect(() => decodeQrlAddress(lowerPrefix)).toThrow(
+    "Unrecognised address format"
+  );
+});
